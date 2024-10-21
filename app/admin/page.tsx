@@ -24,7 +24,6 @@ export default function AdminPage() {
     // Here you would typically make an API call to create the event
     toast({
       title: "Event Created",
-      description: `${eventTitle} has been successfully created.`,
     })
   }
 
@@ -33,7 +32,6 @@ export default function AdminPage() {
     // Here you would typically make an API call to create the partner
     toast({
       title: "Partner Created",
-      description: `${partnerName} has been added as a partner.`,
     })
   }
 

@@ -5,10 +5,10 @@ import { Button } from '@/components/ui/button'
 
 // Mock partner data (replace with actual data fetching)
 const partners = [
-  { id: 1, name: 'Kenya Wildlife Service', logo: '/images/partner1.png' },
-  { id: 2, name: 'Serena Hotels', logo: '/images/partner2.png' },
-  { id: 3, name: 'Kenya Airways', logo: '/images/partner3.png' },
-  { id: 4, name: 'Safaricom', logo: '/images/partner4.png' },
+  { id: 1, name: 'Kenya Wildlife Service', logo: '/images/kws.jpeg' },
+  { id: 2, name: 'Serena Hotels', logo: '/images/serena.jpeg' },
+  { id: 3, name: 'Kenya Airways', logo: '/images/KQ.png' },
+  { id: 4, name: 'Safaricom', logo: '/images/saf.png' },
 ]
 
 export default function PartnersPage() {

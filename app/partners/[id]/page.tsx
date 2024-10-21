@@ -10,11 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 const partner = {
   id: 1,
   name: 'Kenya Wildlife Service',
-  logo: '/images/partner1.png',
+  logo: '/images/kws.jpeg',
   description: 'Kenya Wildlife Service is the state corporation that conserves and manages Kenya\'s wildlife for the Kenyan people and the world.',
   events: [
-    { id: 1, title: 'Tsavo National Park Safari', date: '2023-07-15', image: '/images/event1.jpg' },
-    { id: 2, title: 'Amboseli Elephant Watch', date: '2023-08-01', image: '/images/event2.jpg' },
+    { id: 1, title: 'Tsavo National Park Safari', date: '2023-07-15', image: '/images/hero1.jpg' },
+    { id: 2, title: 'Amboseli Elephant Watch', date: '2023-08-01', image: '/images/hero2.jpeg' },
   ],
   testimonials: [
     { id: 1, text: 'Tujuane has been an excellent partner in promoting wildlife conservation through responsible tourism.', author: 'John Doe, KWS Director' },
@@ -68,7 +68,7 @@ export default function PartnerDetailPage() {
             {partner.testimonials.map((testimonial) => (
               <Card key={testimonial.id}>
                 <CardHeader>
-                  <CardDescription>"{testimonial.text}"</CardDescription>
+                  <CardDescription>{testimonial.text}</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <p className="font-semibold">{testimonial.author}</p>

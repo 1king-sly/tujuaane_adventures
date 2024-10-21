@@ -7,8 +7,10 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 export default function Home() {
   const heroImages = [
     '/images/hero1.jpg',
-    '/images/hero2.jpg',
-    '/images/hero3.jpg',
+    '/images/hero2.jpeg',
+    '/images/hero3.jpeg',
+    '/images/hero4.jpeg',
+    '/images/hero5.jpeg',
   ]
 
   const services = [
@@ -21,9 +23,9 @@ export default function Home() {
   ]
 
   const upcomingEvents = [
-    { title: 'Mount Kenya Expedition', date: '2023-08-15', image: '/images/event1.jpg' },
-    { title: 'Masai Mara Safari', date: '2023-09-01', image: '/images/event2.jpg' },
-    { title: 'Coastal Beach Retreat', date: '2023-09-15', image: '/images/event3.jpg' },
+    { title: 'Mount Kenya Expedition', date: '2023-08-15', image: '/images/hero1.jpg' },
+    { title: 'Masai Mara Safari', date: '2023-09-01', image: '/images/hero2.jpeg' },
+    { title: 'Coastal Beach Retreat', date: '2023-09-15', image: '/images/hero3.jpeg' },
   ]
 
   return (
@@ -34,7 +36,7 @@ export default function Home() {
             {heroImages.map((image, index) => (
               <CarouselItem key={index}>
                 <div className="relative h-[60vh]">
-                  <Image src={image} alt={`Hero image ${index + 1}`} layout="fill" objectFit="cover" />
+                  <Image src={image} alt={`Hero image ${index + 1}`} layout="fill"  className='object-cover' />
                   <div className="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center">
                     <div className="text-center text-white">
                       <h1 className="text-4xl md:text-6xl font-bold mb-4">Discover East Africa</h1>
@@ -74,7 +76,7 @@ export default function Home() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {upcomingEvents.map((event, index) => (
             <Card key={index}>
-              <Image src={event.image} alt={event.title} width={400} height={200} className="rounded-t-lg" />
+              <Image src={event.image} alt={event.title} width={400} height={200} className="rounded-t-lg  object-cover  " />
               <CardHeader>
                 <CardTitle>{event.title}</CardTitle>
                 <CardDescription>{event.date}</CardDescription>

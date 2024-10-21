@@ -16,7 +16,7 @@ const event = {
   description: 'Conquer Africa\'s second-highest peak',
   date: '2023-08-15',
   price: 500,
-  image: '/images/event1.jpg',
+  image: '/images/hero5.jpeg',
 }
 
 export default function EventBookingPage() {
@@ -30,7 +30,7 @@ export default function EventBookingPage() {
     // Here you would typically make an API call to process the booking
     toast({
       title: "Booking Confirmed!",
-      description: `You've successfully booked ${people} spot(s) for ${event.title}. A payment prompt has been sent to your phone.`,
+      
     })
   }
 
