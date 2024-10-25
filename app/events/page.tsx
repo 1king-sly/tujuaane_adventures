@@ -13,7 +13,7 @@ const events = [
     date: '2023-08-15',
     price: 500,
     discount: 50,
-    image: '/images/event1.jpg',
+    image: '/images/hero1.jpg',
     bookings: 15,
   },
   {
@@ -23,7 +23,7 @@ const events = [
     date: '2023-09-01',
     price: 800,
     discount: 0,
-    image: '/images/event2.jpg',
+    image: '/images/hero2.jpeg',
     bookings: 20,
   },
   {
@@ -33,7 +33,7 @@ const events = [
     date: '2023-09-15',
     price: 300,
     discount: 30,
-    image: '/images/event3.jpg',
+    image: '/images/hero3.jpeg',
     bookings: 10,
   },
 ]
