@@ -12,3 +12,6 @@ const options = typeof secret === 'string' ? { ...authOptions, secret } : authOp
 const handler = NextAuth(options);
 
 export { handler as GET, handler as POST };
+
+
+

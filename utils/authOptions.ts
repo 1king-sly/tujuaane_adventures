@@ -1,6 +1,5 @@
 import NextAuth from "next-auth"
 import { PrismaAdapter } from "@next-auth/prisma-adapter"
-import { PrismaClient } from "@prisma/client"
 import prisma from '@/app/lib/prismadb';
 
 import CredentialsProvider from "next-auth/providers/credentials"
@@ -48,20 +47,32 @@ export const authOptions=
       }
     })
   ],
-  session: {
-    strategy: "jwt" as SessionStrategyType,
-  },
+  
   callbacks: {
     async jwt({ token, user }: { token: any; user: any }) {
       if (user) {
-        // token.role = user.role
-      }
+        return{
+          ...token,
+          id:user.id,
+          email: user.email,
+          name:user.name,
+          role:user.role,
+          createdAt:user.createdAt,
+          updatedAt:user.updatedAt,  
+        }      }
       return token
     },
     async session({ session, token }: { session: any; token: any }) {
       if (session?.user) {
-        // session.user.role = token.role
-      }
+        return{
+          ...session,
+          id:token.sub,
+          email:token.email,
+          createdAt:token.createdAt,
+          updatedAt:token.updatedAt,
+          name:token.name,  
+    
+        }      }
       return session
     }
   },
@@ -70,9 +81,9 @@ export const authOptions=
   },
 
   debug: process.env.NODE_ENV === 'development',
-//   session: {
-//     strategy: 'jwt' as SessionStrategyType,
-//   },
+  session: {
+    strategy: 'jwt' as SessionStrategyType,
+  },
   secret: process.env.NEXTAUTH_SECRET,
 }
 
