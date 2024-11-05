@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/components/ui/use-toast'
+import { useToast } from '@/hooks/use-toast'
+import ImageUpload from '@/components/imageUpload'
 
 export default function AdminPage() {
   const [eventTitle, setEventTitle] = useState('')
@@ -15,28 +16,65 @@ export default function AdminPage() {
   const [eventDate, setEventDate] = useState('')
   const [eventPrice, setEventPrice] = useState('')
   const [eventDiscount, setEventDiscount] = useState('')
+  const [eventImage, setEventImage] = useState<File | null>(null)
   const [partnerName, setPartnerName] = useState('')
   const [partnerEmail, setPartnerEmail] = useState('')
+  const [partnerImage, setPartnerImage] = useState<File | null>(null)
   const { toast } = useToast()
 
-  const handleCreateEvent = (e: React.FormEvent) => {
+  const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically make an API call to create the event
-    toast({
-      title: "Event Created",
-    })
+    try {
+      const formData = new FormData()
+      formData.append('title', eventTitle)
+      formData.append('description', eventDescription)
+      formData.append('date', eventDate)
+      formData.append('price', eventPrice)
+      formData.append('discount', eventDiscount)
+      if (eventImage) {
+        formData.append('image', eventImage)
+      }
+
+      // Here you would make an API call to create the event
+      toast({
+        title: "Event Created",
+        description: `${eventTitle} has been successfully created.`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create event. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
-  const handleCreatePartner = (e: React.FormEvent) => {
+  const handleCreatePartner = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Here you would typically make an API call to create the partner
-    toast({
-      title: "Partner Created",
-    })
+    try {
+      const formData = new FormData()
+      formData.append('name', partnerName)
+      formData.append('email', partnerEmail)
+      if (partnerImage) {
+        formData.append('image', partnerImage)
+      }
+
+      // Here you would make an API call to create the partner
+      toast({
+        title: "Partner Created",
+        description: `${partnerName} has been added as a partner.`,
+      })
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to create partner. Please try again.",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-24">
       <h1 className="text-4xl font-bold mb-8">Admin Dashboard</h1>
       <Tabs defaultValue="stats">
         <TabsList className="grid w-full grid-cols-4">
@@ -136,6 +174,10 @@ export default function AdminPage() {
                       onChange={(e) => setEventDiscount(e.target.value)}
                     />
                   </div>
+                  <div>
+                    <Label>Event Image</Label>
+                    <ImageUpload onImageSelect={(file) => setEventImage(file)} />
+                  </div>
                   <Button type="submit">Create Event</Button>
                 </form>
               </CardContent>
@@ -163,7 +205,12 @@ export default function AdminPage() {
                       value={partnerEmail}
                       onChange={(e) => setPartnerEmail(e.target.value)}
                       required
-                    /></div>
+                    />
+                  </div>
+                  <div>
+                    <Label>Partner Logo</Label>
+                    <ImageUpload onImageSelect={(file) => setPartnerImage(file)} />
+                  </div>
                   <Button type="submit">Create Partner</Button>
                 </form>
               </CardContent>

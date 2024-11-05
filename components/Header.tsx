@@ -1,159 +1,198 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useSession, signIn, signOut } from "next-auth/react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Compass, Menu, X } from "lucide-react"; // Importing icons
-import { Transition } from '@headlessui/react'; // Optional for smooth transitions
+import { Compass, Menu, Moon, Sun, User, X } from "lucide-react";
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet'
+
+import { Transition } from "@headlessui/react";
 
 export default function Header() {
   const { data: session } = useSession();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isLoginMode, setIsLoginMode] = useState(true);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // State for mobile menu
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+  const { theme, setTheme } = useTheme();
 
-  const handleAuthSubmit = async (event:any) => {
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const handleAuthSubmit = async (event: any) => {
     event.preventDefault();
-
-    // Create a FormData object from the form element
     const formData = {
       fullName: event.target.fullName?.value,
-      password: event.target.password.value,
       email: event.target.email.value,
+      password: event.target.password.value,
     };
+    const url = `${API_URL}/auth/${isLoginMode ? "login" : "signup"}`;
 
-    const loginData = new FormData(event.target)
+    const response = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
 
-    if (isLoginMode) {
-      // Handle login
-      const response = await fetch(`http://127.0.0.1:8000/auth/login`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body:JSON.stringify(formData) 
-      }
-        )
-
-      if (response.ok) {
-        console.log("Login successful:");
-         const resp  = await response.json()
-
-         localStorage.setItem("accessToken", resp.access_token);
-
-        } else {
-        console.error("Login up failed:",  response);
-        console.log(loginData)
+    if (response.ok) {
+      console.log(isLoginMode ? "Login successful" : "Sign up successful");
+      const data = await response.json();
+      if (isLoginMode) {
+        localStorage.setItem("accessToken", data.access_token);
       }
       setIsLoginOpen(false);
     } else {
-      // Handle sign up
-      const response = await fetch(`http://127.0.0.1:8000/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(
-          formData
-      )
-      }
-        )
-
-      if (response.ok) {
-        console.log("Sign up successful:", await response.json());
-      } else {
-        console.error("Sign up failed:",  response);
-      }
-      setIsLoginOpen(false);
+      console.error(`${isLoginMode ? "Login" : "Sign up"} failed:`, response);
     }
   };
 
+  const navigation = [
+    { name: "Events", href: "/events" },
+    { name: "Services", href: "/services" },
+    { name: "Partners", href: "/partners" },
+    { name: "Gallery", href: "/gallery" },
+  ];
+
+  const NavLinks = () => (
+    <>
+      {navigation.map((item) => (
+        <li key={item.name}>
+          <Link href={item.href} className="hover:text-primary transition-colors">
+            {item.name}
+          </Link>
+        </li>
+      ))}
+    </>
+  )
+
+  const AuthButtons = () => (
+    <>
+      {session ? (
+        <>
+          <Link href="/profile">
+            <Button variant="ghost" size="icon">
+              <User className="h-5 w-5" />
+            </Button>
+          </Link>
+          <Button onClick={() => signOut()} variant="secondary">Sign Out</Button>
+        </>
+      ) : (
+        <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
+        <DialogTrigger asChild>
+          <Button variant="secondary">Login / Sign Up</Button>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <form onSubmit={handleAuthSubmit} className="grid gap-4 py-4">
+            {!isLoginMode && (
+              <div className="grid gap-2">
+                <Label htmlFor="fullName">Full Name</Label>
+                <Input id="fullName" name="fullName" required />
+              </div>
+            )}
+            <div className="grid gap-2">
+              <Label htmlFor="email">Email</Label>
+              <Input id="email" name="email" type="email" required />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="password">Password</Label>
+              <Input id="password" name="password" type="password" required />
+            </div>
+            <div className="flex justify-between">
+              <Button type="submit">{isLoginMode ? "Login" : "Sign Up"}</Button>
+              <Button variant="outline" type="button" onClick={() => setIsLoginMode(!isLoginMode)}>
+                {isLoginMode ? "Switch to Sign Up" : "Switch to Login"}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+      )}
+    </>
+  )
+
   return (
-    <header className="bg-primary text-primary-foreground py-4">
-      <div className="container mx-auto flex justify-between items-center">
+    <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b">
+    <div className="container mx-auto px-4">
+      <div className="flex h-16 items-center justify-between">
         <Link href="/" className="flex items-center space-x-2">
-          <Compass className="h-8 w-8" />
+          <Compass className="h-8 w-8 text-primary" />
           <span className="text-2xl font-bold">Tujuane</span>
         </Link>
-        <button 
-          className="md:hidden" 
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} // Toggle mobile menu
-        >
-          {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-        <nav className={`md:flex space-x-4 ${isMobileMenuOpen ? "block" : "hidden"} md:block`}>
-          <ul className={`flex flex-col md:flex-row space-x-0 md:space-x-4`}>
-            <li><Link href="/events">Events</Link></li>
-            <li><Link href="/services">Services</Link></li>
-            <li><Link href="/partners">Partners</Link></li>
-            {session ? (
-              <>
-                <li><Link href="/profile">Profile</Link></li>
-                <li><Button onClick={() => signOut()}>Sign Out</Button></li>
-              </>
-            ) : (
-              <li>
-                <Dialog open={isLoginOpen} onOpenChange={setIsLoginOpen}>
-                  <DialogTrigger asChild>
-                    <Button variant="secondary">Login / Sign Up</Button>
-                  </DialogTrigger>
-                  <DialogContent className="sm:max-w-[425px]">
-                    <form onSubmit={handleAuthSubmit} className="grid gap-4 py-4">
-                      {!isLoginMode && (
-                        <div className="grid grid-cols-4 items-center gap-4">
-                          <Label htmlFor="fullName" className="text-right">
-                            Full Name
-                          </Label>
-                          <Input id="fullName" name="fullName" className="col-span-3" required />
-                        </div>
-                      )}
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="email" className="text-right">
-                          Email
-                        </Label>
-                        <Input id="email" name="email" className="col-span-3" required />
-                      </div>
-                      <div className="grid grid-cols-4 items-center gap-4">
-                        <Label htmlFor="password" className="text-right">
-                          Password
-                        </Label>
-                        <Input id="password" name="password" type="password" className="col-span-3" required />
-                      </div>
-                      <div className="flex justify-between">
-                        <Button type="submit">{isLoginMode ? "Login" : "Sign Up"}</Button>
-                        <Button
-                          variant="outline"
-                          type="button"
-                          onClick={() => setIsLoginMode(!isLoginMode)}
-                        >
-                          {isLoginMode ? "Switch to Sign Up" : "Switch to Login"}
-                        </Button>
-                      </div>
-                    </form>
-                  </DialogContent>
-                </Dialog>
-              </li>
-            )}
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:block">
+          <ul className="flex space-x-8">
+            <NavLinks />
           </ul>
         </nav>
-      </div>
-      <Transition
-        show={isMobileMenuOpen}
-        enter="transition-transform transform duration-200"
-        enterFrom="translate-y-[-100%]"
-        enterTo="translate-y-0"
-        leave="transition-transform transform duration-200"
-        leaveFrom="translate-y-0"
-        leaveTo="translate-y-[-100%]"
-      >
-        <div className="md:hidden bg-white rounded-lg shadow-md p-4">
-          <ul className="flex flex-col space-y-2">
-            <li><Link href="/events">Events</Link></li>
-            <li><Link href="/services">Services</Link></li>
-            <li><Link href="/partners">Partners</Link></li>
-          </ul>
+
+        <div className="hidden md:flex items-center space-x-4">
+          {isMounted && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            >
+              {theme === 'dark' ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+          )}
+          <AuthButtons />
         </div>
-      </Transition>
-    </header>
+
+        {/* Mobile Navigation */}
+        <Sheet>
+          <SheetTrigger asChild className="md:hidden">
+            <Button variant="ghost" size="icon">
+              <Menu className="h-6 w-6" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent>
+            <div className="flex flex-col h-full">
+              <nav className="flex-1">
+                <ul className="space-y-4 mt-8">
+                  <NavLinks />
+                </ul>
+              </nav>
+              <div className="flex flex-col space-y-4 mb-8">
+                {isMounted && (
+                  <Button
+                    variant="ghost"
+                    onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+                    className="justify-start"
+                  >
+                    {theme === 'dark' ? (
+                      <>
+                        <Sun className="h-5 w-5 mr-2" />
+                        Light Mode
+                      </>
+                    ) : (
+                      <>
+                        <Moon className="h-5 w-5 mr-2" />
+                        Dark Mode
+                      </>
+                    )}
+                  </Button>
+                )}
+                <AuthButtons />
+              </div>
+            </div>
+          </SheetContent>
+        </Sheet>
+      </div>
+    </div>
+  </header>
   );
 }
