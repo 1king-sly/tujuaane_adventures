@@ -12,7 +12,7 @@ import ImageUpload from '@/components/imageUpload'
 
 export default function AdminPage() {
   const [eventTitle, setEventTitle] = useState('')
-  const [eventDescription, setEventDescription] = useState('')
+  const [location, setEventLocation] = useState('')
   const [eventDate, setEventDate] = useState('')
   const [eventPrice, setEventPrice] = useState('')
   const [eventDiscount, setEventDiscount] = useState('')
@@ -22,20 +22,33 @@ export default function AdminPage() {
   const [partnerImage, setPartnerImage] = useState<File | null>(null)
   const { toast } = useToast()
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
   const handleCreateEvent = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
       const formData = new FormData()
-      formData.append('title', eventTitle)
-      formData.append('description', eventDescription)
+      formData.append('name', eventTitle)
+      formData.append('discount', eventDiscount)
+      formData.append('location', location)
+      
       formData.append('date', eventDate)
       formData.append('price', eventPrice)
-      formData.append('discount', eventDiscount)
       if (eventImage) {
         formData.append('image', eventImage)
       }
 
-      // Here you would make an API call to create the event
+      const response = await fetch(`${API_URL}/events/create`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("accessToken"),
+         },
+        body: JSON.stringify(formData),
+      });
+
+      console.log(await response.json())
+     
       toast({
         title: "Event Created",
         description: `${eventTitle} has been successfully created.`,
@@ -137,14 +150,15 @@ export default function AdminPage() {
                     />
                   </div>
                   <div>
-                    <Label htmlFor="eventDescription">Description</Label>
-                    <Textarea
-                      id="eventDescription"
-                      value={eventDescription}
-                      onChange={(e) => setEventDescription(e.target.value)}
+                    <Label htmlFor="location">Event Location</Label>
+                    <Input
+                      id="location"
+                      value={location}
+                      onChange={(e) => setEventLocation(e.target.value)}
                       required
                     />
                   </div>
+                
                   <div>
                     <Label htmlFor="eventDate">Date</Label>
                     <Input

@@ -41,7 +41,7 @@ export default function ImageUpload({ onImageSelect, defaultImage }: ImageUpload
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 ">
       <div 
         {...getRootProps()} 
         className={`image-upload-preview ${isDragActive ? 'border-primary' : ''}`}
