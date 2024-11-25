@@ -47,7 +47,7 @@ export default function Header() {
       console.log(isLoginMode ? "Login successful" : "Sign up successful");
       const data = await response.json();
       if (isLoginMode) {
-        localStorage.setItem("accessToken", data.access_token);
+        localStorage.setItem("tujuane_access_token", data.access_token);
       }
       setIsLoginOpen(false);
     } else {

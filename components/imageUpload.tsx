@@ -53,7 +53,7 @@ export default function ImageUpload({ onImageSelect, defaultImage }: ImageUpload
               src={preview}
               alt="Upload preview"
               fill
-              className="object-cover rounded-lg"
+              className="object-fit rounded-lg"
               sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             />
             <div className="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-black/50 rounded-lg">

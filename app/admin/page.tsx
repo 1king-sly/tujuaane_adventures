@@ -1,90 +1,125 @@
-"use client"
+"use client";
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { useToast } from '@/hooks/use-toast'
-import ImageUpload from '@/components/imageUpload'
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
+import ImageUpload from "@/components/imageUpload";
 
 export default function AdminPage() {
-  const [eventTitle, setEventTitle] = useState('')
-  const [location, setEventLocation] = useState('')
-  const [eventDate, setEventDate] = useState('')
-  const [eventPrice, setEventPrice] = useState('')
-  const [eventDiscount, setEventDiscount] = useState('')
-  const [eventImage, setEventImage] = useState<File | null>(null)
-  const [partnerName, setPartnerName] = useState('')
-  const [partnerEmail, setPartnerEmail] = useState('')
-  const [partnerImage, setPartnerImage] = useState<File | null>(null)
-  const { toast } = useToast()
+  const [eventTitle, setEventTitle] = useState("");
+  const [location, setEventLocation] = useState("");
+  const [eventDate, setEventDate] = useState("");
+  const [eventPrice, setEventPrice] = useState("");
+  const [eventDiscount, setEventDiscount] = useState("");
+  const [eventImage, setEventImage] = useState<File | null>(null);
+  const [partnerName, setPartnerName] = useState("");
+  const [partnerEmail, setPartnerEmail] = useState("");
+  const [partnerImage, setPartnerImage] = useState<File | null>(null);
+  const { toast } = useToast();
+
+  const [event, setEvent] = useState<{
+    name: string;
+    discount: number;
+    location: string;
+    date: string;
+    price: number;
+    image: File | null;
+    maxAttendees:number
+  }>({
+    name: "",
+    discount: 0,
+    location: "",
+    date: "",
+    price: 1,
+    image: null,
+    maxAttendees:0
+  });
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
-
   const handleCreateEvent = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const formData = new FormData()
-      formData.append('name', eventTitle)
-      formData.append('discount', eventDiscount)
-      formData.append('location', location)
-      
-      formData.append('date', eventDate)
-      formData.append('price', eventPrice)
-      if (eventImage) {
-        formData.append('image', eventImage)
+      const formData = new FormData();
+      formData.append("name", event.name);
+      formData.append("location", event.location);
+      formData.append("date", event.date);
+      formData.append("max_attendees", event.maxAttendees.toString());
+      formData.append("price", event.price.toString());
+      formData.append("discount", event.discount.toString());
+      if (event.image) {
+        formData.append("image", event.image); // Attach the file
       }
-
       const response = await fetch(`${API_URL}/events/create`, {
         method: "POST",
-        headers: { "Content-Type": "application/json",
-          Authorization: "Bearer " + localStorage.getItem("accessToken"),
-         },
-        body: JSON.stringify(formData),
+        headers: {
+          Authorization: "Bearer " + localStorage.getItem("tujuane_access_token"),
+        },
+        body: formData,
       });
 
-      console.log(await response.json())
-     
-      toast({
-        title: "Event Created",
-        description: `${eventTitle} has been successfully created.`,
-      })
+      const resp = await response.json()
+
+      console.log(resp)
+
+      if (response.ok) {
+        toast({
+          title: "Event Created",
+          description: `${event.name} has been successfully created.`,
+        });
+        setEvent({
+          name: "",
+          discount: 0,
+          location: "",
+          date: "",
+          price: 1,
+          image: null,
+          maxAttendees:1
+        });
+      } else {
+        toast({
+          title: "Failed",
+          description: `${event.name} could not be created.`,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to create event. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   const handleCreatePartner = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      const formData = new FormData()
-      formData.append('name', partnerName)
-      formData.append('email', partnerEmail)
+      const formData = new FormData();
+      formData.append("name", partnerName);
+      formData.append("email", partnerEmail);
       if (partnerImage) {
-        formData.append('image', partnerImage)
+        formData.append("image", partnerImage);
       }
 
       // Here you would make an API call to create the partner
       toast({
         title: "Partner Created",
         description: `${partnerName} has been added as a partner.`,
-      })
+      });
     } catch (error) {
       toast({
         title: "Error",
         description: "Failed to create partner. Please try again.",
         variant: "destructive",
-      })
+      });
     }
-  }
+  };
 
   return (
     <div className="container mx-auto px-4 py-24">
@@ -144,8 +179,10 @@ export default function AdminPage() {
                     <Label htmlFor="eventTitle">Event Title</Label>
                     <Input
                       id="eventTitle"
-                      value={eventTitle}
-                      onChange={(e) => setEventTitle(e.target.value)}
+                      value={event.name}
+                      onChange={(e) =>
+                        setEvent({ ...event, name: e.target.value })
+                      }
                       required
                     />
                   </div>
@@ -153,44 +190,75 @@ export default function AdminPage() {
                     <Label htmlFor="location">Event Location</Label>
                     <Input
                       id="location"
-                      value={location}
-                      onChange={(e) => setEventLocation(e.target.value)}
-                      required
+                      value={event.location}
+                      onChange={(e) =>
+                        setEvent({ ...event, location: e.target.value })
+                      }
                     />
                   </div>
-                
-                  <div>
+
+                  <div className="flex w-full gap-2 flex-col sm:flex-row ">
+                    <div className='w-full'>
                     <Label htmlFor="eventDate">Date</Label>
                     <Input
                       id="eventDate"
                       type="date"
-                      value={eventDate}
-                      onChange={(e) => setEventDate(e.target.value)}
+                      min={new Date().toISOString().split("T")[0]}
+                      value={event.date}
+                      onChange={(e) =>
+                        setEvent({ ...event, date: e.target.value })
+                      }
                       required
                     />
+                    </div>
+                    <div className='w-full'>
+                    <Label htmlFor="maxAttendees">Maximum Attendees</Label>
+                    <Input
+                      id="maxAttendees"
+                      type="number"
+                      min="1"
+                      value={event.maxAttendees}
+                      onChange={(e) =>
+                        setEvent({ ...event, maxAttendees:Number( e.target.value) })
+                      }
+                      required
+                    />
+                    </div>
+                  
                   </div>
                   <div>
                     <Label htmlFor="eventPrice">Price</Label>
                     <Input
                       id="eventPrice"
                       type="number"
-                      value={eventPrice}
-                      onChange={(e) => setEventPrice(e.target.value)}
+                      value={event.price}
+                      onChange={(e) =>
+                        setEvent({ ...event, price: Number(e.target.value) })
+                      }
                       required
                     />
                   </div>
                   <div>
-                    <Label htmlFor="eventDiscount">Discount (optional)</Label>
+                    <Label htmlFor="eventDiscount">
+                      Percentage Discount (optional)
+                    </Label>
                     <Input
                       id="eventDiscount"
                       type="number"
-                      value={eventDiscount}
-                      onChange={(e) => setEventDiscount(e.target.value)}
+                      max="100"
+                      value={event.discount}
+                      onChange={(e) =>
+                        setEvent({ ...event, discount: Number(e.target.value) })
+                      }
                     />
                   </div>
                   <div>
                     <Label>Event Image</Label>
-                    <ImageUpload onImageSelect={(file) => setEventImage(file)} />
+                    <ImageUpload
+                      onImageSelect={(file) =>
+                        setEvent({ ...event, image: file })
+                      }
+                    />
                   </div>
                   <Button type="submit">Create Event</Button>
                 </form>
@@ -223,7 +291,9 @@ export default function AdminPage() {
                   </div>
                   <div>
                     <Label>Partner Logo</Label>
-                    <ImageUpload onImageSelect={(file) => setPartnerImage(file)} />
+                    <ImageUpload
+                      onImageSelect={(file) => setPartnerImage(file)}
+                    />
                   </div>
                   <Button type="submit">Create Partner</Button>
                 </form>
@@ -233,5 +303,5 @@ export default function AdminPage() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

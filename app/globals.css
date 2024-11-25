@@ -59,7 +59,7 @@
 }
 
 .image-upload-preview {
-  @apply relative w-full h-48 border-2 border-dashed rounded-lg overflow-hidden cursor-pointer;
+  @apply relative w-full h-72 border-2 border-dashed rounded-lg overflow-hidden cursor-pointer ;
 }
 
 .image-upload-preview img {
