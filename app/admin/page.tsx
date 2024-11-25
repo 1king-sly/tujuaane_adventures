@@ -11,12 +11,6 @@ import { useToast } from "@/hooks/use-toast";
 import ImageUpload from "@/components/imageUpload";
 
 export default function AdminPage() {
-  const [eventTitle, setEventTitle] = useState("");
-  const [location, setEventLocation] = useState("");
-  const [eventDate, setEventDate] = useState("");
-  const [eventPrice, setEventPrice] = useState("");
-  const [eventDiscount, setEventDiscount] = useState("");
-  const [eventImage, setEventImage] = useState<File | null>(null);
   const [partnerName, setPartnerName] = useState("");
   const [partnerEmail, setPartnerEmail] = useState("");
   const [partnerImage, setPartnerImage] = useState<File | null>(null);
@@ -63,9 +57,7 @@ export default function AdminPage() {
         body: formData,
       });
 
-      const resp = await response.json()
 
-      console.log(resp)
 
       if (response.ok) {
         toast({

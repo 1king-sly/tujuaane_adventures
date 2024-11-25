@@ -21,7 +21,7 @@ export default function RootLayout({
       <body className={inter.className}>
         <ClientProviders>
           <Header />
-          <main>{children}</main>
+          <main className='sm:mt-20'>{children}</main>
           <Footer />
         </ClientProviders>
       </body>
