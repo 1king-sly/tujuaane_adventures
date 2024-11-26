@@ -3,6 +3,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
+import { Badge } from '@/components/ui/badge'
+
 
 
 interface Event{
@@ -11,6 +13,12 @@ interface Event{
     date:string
     location:string
     logo:string
+    discount:number
+    pricePerPerson:number
+    description:string
+    bookings:number
+    newPrice:number
+    maxAttendees:number
   }
 
 export default function Events() {
@@ -60,6 +68,22 @@ export default function Events() {
                       <CardTitle>{event.name}</CardTitle>
                       <CardDescription>{new Date(event.date).toLocaleDateString()}</CardDescription>
                     </CardHeader>
+                    <CardContent>
+              <p className="mb-2">{event.description}</p>
+              <div className="flex justify-between items-center">
+                <div>
+                  {event.newPrice > 0 ? (
+                    <>
+                      <span className="text-lg font-bold text-primary">KES. {event.pricePerPerson - event.discount}</span>
+                      <span className="ml-2 text-sm line-through text-muted-foreground">KES. {event.pricePerPerson}</span>
+                    </>
+                  ) : (
+                    <span className="text-lg font-bold text-primary">KES. {event.pricePerPerson}</span>
+                  )}
+                </div>
+                <Badge variant="secondary">{event.bookings || 0}/{event.maxAttendees} booked</Badge>
+              </div>
+            </CardContent>
                     <CardFooter>
                       <Button asChild>
                         <Link href={`/events/${event.id}`}>Book Now</Link>

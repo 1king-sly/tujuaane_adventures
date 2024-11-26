@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from 'react'
+import { useState,useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -10,17 +10,61 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from '@/hooks/use-toast'
 import { Search, Plus, Edit, Trash } from 'lucide-react'
 
-const events = [
-  { id: 1, title: 'Mount Kenya Expedition', date: '2023-08-15', price: 500, bookings: 15 },
-  { id: 2, title: 'Masai Mara Safari', date: '2023-09-01', price: 800, bookings: 20 },
-]
+
+
+interface Event{
+    id:string
+    name:string,
+    date:string
+    location:string
+    logo:string
+    discount:number
+    pricePerPerson:number
+    description:string
+    bookings:number
+    newPrice:number
+    maxAttendees:number
+  }
+
 
 export default function AdminEventsPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const { toast } = useToast()
 
-  const handleDelete = async (id: number) => {
-    // Add API call to delete event
+  const [events,setEvents] = useState<Event[]>([])
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
+
+
+  useEffect(() => {
+
+    const fetchEvents =async()=>{
+      const response =await fetch(`${API_URL}/events/`, {
+        method: "GET",
+        headers: {
+          'Content-Type':"application/json"
+        },
+    
+      })
+
+      const data = await response.json()
+
+
+      if(response.ok){
+        setEvents(data)
+      }
+
+    
+    }
+
+    fetchEvents()
+
+ 
+  }, [API_URL]);
+
+  const handleDelete = async (id: string) => {
     toast({
       title: "Event Deleted",
       description: "The event has been successfully deleted.",
@@ -28,7 +72,7 @@ export default function AdminEventsPage() {
   }
 
   const filteredEvents = events.filter(event => 
-    event.title.toLowerCase().includes(searchTerm.toLowerCase())
+    event.name.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   return (
@@ -65,9 +109,9 @@ export default function AdminEventsPage() {
         <TableBody>
           {filteredEvents.map((event) => (
             <TableRow key={event.id}>
-              <TableCell>{event.title}</TableCell>
-              <TableCell>{event.date}</TableCell>
-              <TableCell>${event.price}</TableCell>
+              <TableCell>{event.name}</TableCell>
+              <TableCell>{new Date(event.date).toLocaleDateString()}</TableCell>
+              <TableCell>KES. {event.newPrice || event.pricePerPerson}</TableCell>
               <TableCell>{event.bookings}</TableCell>
               <TableCell>
                 <div className="flex space-x-2">

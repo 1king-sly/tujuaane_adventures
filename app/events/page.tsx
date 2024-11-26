@@ -1,79 +1,100 @@
+'use client'
+import { useState, useEffect } from "react";
 import Link from 'next/link'
 import Image from 'next/image'
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
 
-// This would typically come from an API or database
-const events = [
-  {
-    id: 1,
-    title: 'Mount Kenya Expedition',
-    description: 'Conquer Africa\'s second-highest peak',
-    date: '2023-08-15',
-    price: 500,
-    discount: 50,
-    image: '/images/hero1.jpg',
-    bookings: 15,
-  },
-  {
-    id: 2,
-    title: 'Masai Mara Safari',
-    description: 'Witness the great wildebeest migration',
-    date: '2023-09-01',
-    price: 800,
-    discount: 0,
-    image: '/images/hero2.jpeg',
-    bookings: 20,
-  },
-  {
-    id: 3,
-    title: 'Coastal Beach Retreat',
-    description: 'Relax on the beautiful beaches of Diani',
-    date: '2023-09-15',
-    price: 300,
-    discount: 30,
-    image: '/images/hero3.jpeg',
-    bookings: 10,
-  },
-]
+interface Event{
+  id:string
+  name:string,
+  date:string
+  location:string
+  logo:string
+  discount:number
+  pricePerPerson:number
+  description:string
+  bookings:number
+  newPrice:number
+  maxAttendees:number
+}
 
 export default function EventsPage() {
+
+  const [events,setEvents] = useState<Event[]>([])
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
+
+
+  useEffect(() => {
+
+    const fetchEvents =async()=>{
+      const response =await fetch(`${API_URL}/events/`, {
+        method: "GET",
+        headers: {
+          'Content-Type':"application/json"
+        },
+    
+      })
+
+      const data = await response.json()
+
+
+      if(response.ok){
+        setEvents(data)
+      }
+
+    
+    }
+
+    fetchEvents()
+
+ 
+  }, [API_URL]);
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-4xl font-bold mb-8">Upcoming Events</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {events.map((event) => (
-          <Card key={event.id} className="overflow-hidden">
-            <Image src={event.image} alt={event.title} width={400} height={200} className="w-full h-48 object-cover" />
-            <CardHeader>
-              <CardTitle>{event.title}</CardTitle>
-              <CardDescription>{event.date}</CardDescription>
-            </CardHeader>
-            <CardContent>
+    <>
+    
+    {events && events.length > 0 && (
+              <section className="mb-16 container mx-auto px-4 py-8 ">
+              <h2 className="text-3xl font-bold mb-8">Upcoming Events</h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                {events.map((event) => (
+                  <Card key={event.id}>
+                    <Image src={event.logo} alt={event.name} width={400} height={200} className="rounded-t-lg  object-cover h-[200px]  " />
+                    <CardHeader>
+                      <CardTitle>{event.name}</CardTitle>
+                      <CardDescription>{new Date(event.date).toLocaleDateString()}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
               <p className="mb-2">{event.description}</p>
               <div className="flex justify-between items-center">
                 <div>
-                  {event.discount > 0 ? (
+                  {event.newPrice > 0 ? (
                     <>
-                      <span className="text-lg font-bold text-primary">${event.price - event.discount}</span>
-                      <span className="ml-2 text-sm line-through text-muted-foreground">${event.price}</span>
+                      <span className="text-lg font-bold text-primary">KES. {event.pricePerPerson - event.discount}</span>
+                      <span className="ml-2 text-sm line-through text-muted-foreground">KES. {event.pricePerPerson}</span>
                     </>
                   ) : (
-                    <span className="text-lg font-bold text-primary">${event.price}</span>
+                    <span className="text-lg font-bold text-primary">KES. {event.pricePerPerson}</span>
                   )}
                 </div>
-                <Badge variant="secondary">{event.bookings} booked</Badge>
+                <Badge variant="secondary">{event.bookings || 0}/{event.maxAttendees} booked</Badge>
               </div>
             </CardContent>
-            <CardFooter>
-              <Button asChild className="w-full">
-                <Link href={`/events/${event.id}`}>Book Now</Link>
-              </Button>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    </div>
+                    <CardFooter>
+                      <Button asChild>
+                        <Link href={`/events/${event.id}`}>Book Now</Link>
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))}
+              </div>
+            </section>
+      )}
+    </>
   )
 }

@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from 'react'
-import { useParams } from 'next/navigation'
+import { useState,useEffect } from 'react'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -34,10 +33,71 @@ const event = {
   ]
 }
 
-export default function AdminEventDetailPage() {
-  const { id } = useParams()
+interface Event{
+    id:string,
+    name:string,
+    date:string,
+    pricePerPerson:number,
+    logo:string,
+    bookings:[
+        {
+            id:string,
+            user:{
+                name:string,
+                email:string
+            },
+            people:number,
+            totalCost:number,
+        }
+    ],
+    testimonials:[
+        {
+            id:string,
+            user:{
+                name:string
+            },
+            content:string,
+            rating:number
+        }
+    ]
+    images:string[]
+    description:string
+  }
+
+export default function AdminEventDetailPage({params}:{params:{id:string}}) {
   const [newImages, setNewImages] = useState<File[]>([])
   const { toast } = useToast()
+  const [event,setEvent] = useState<Event>()
+
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
+  useEffect(()=>{
+
+    const fetchEvents =async()=>{
+      const response =await fetch(`${API_URL}/events/${params.id}`, {
+        method: "GET",
+        headers: {
+          'Content-Type':"application/json"
+        },
+    
+      })
+
+      const data = await response.json()
+      console.log(data)
+
+      if(response.ok){
+        setEvent(data)
+      }
+
+    
+    }
+
+    fetchEvents()
+
+ 
+  }, [API_URL, params.id])
+
 
   const handleImageUpload = (file: File) => {
     setNewImages(prev => [...prev, file])
@@ -52,111 +112,114 @@ export default function AdminEventDetailPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle className="text-3xl">{event.title}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Image src={event.image} alt={event.title} width={400} height={300} className="rounded-lg" />
-            <div>
-              <p className="text-lg mb-2">{event.description}</p>
-              <p className="font-semibold">Date: {event.date}</p>
-              <p className="font-semibold">Price: ${event.price}</p>
+    event?(
+        <div className="container mx-auto px-4 py-8">
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle className="text-3xl">{event.name}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <Image src={event.logo} alt={event.name} width={400} height={300} className="rounded-lg" />
+              <div>
+                <p className="text-lg mb-2">{event.description}</p>
+                <p className="font-semibold">Date: {new Date(event.date).toLocaleDateString()}</p>
+                <p className="font-semibold">Price: KES. {event.pricePerPerson}</p>
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Accordion type="single" collapsible className="space-y-4">
-        <AccordionItem value="bookings">
-          <AccordionTrigger className="text-xl font-semibold">
-            <Users className="mr-2" /> Bookings
-          </AccordionTrigger>
-          <AccordionContent>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>User</TableHead>
-                  <TableHead>Email</TableHead>
-                  <TableHead>People</TableHead>
-                  <TableHead>Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {event.bookings.map((booking) => (
-                  <TableRow key={booking.id}>
-                    <TableCell>{booking.user}</TableCell>
-                    <TableCell>{booking.email}</TableCell>
-                    <TableCell>{booking.people}</TableCell>
-                    <TableCell>${booking.total}</TableCell>
+          </CardContent>
+        </Card>
+  
+        <Accordion type="single" collapsible className="space-y-4">
+          <AccordionItem value="bookings">
+            <AccordionTrigger className="text-xl font-semibold">
+              <Users className="mr-2" /> Bookings
+            </AccordionTrigger>
+            <AccordionContent>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>User</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>People</TableHead>
+                    <TableHead>Total</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="testimonials">
-          <AccordionTrigger className="text-xl font-semibold">
-            <Star className="mr-2" /> Testimonials
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-4">
-              {event.testimonials.map((testimonial) => (
-                <Card key={testimonial.id}>
-                  <CardContent className="pt-6">
-                    <div className="flex items-center mb-2">
-                      <div className="flex">
-                        {Array.from({ length: testimonial.rating }).map((_, i) => (
-                          <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
-                        ))}
-                      </div>
-                      <span className="ml-2 font-semibold">{testimonial.user}</span>
-                    </div>
-                    <p>{testimonial.comment}</p>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="gallery">
-          <AccordionTrigger className="text-xl font-semibold">
-            <ImageIcon className="mr-2" /> Gallery
-          </AccordionTrigger>
-          <AccordionContent>
-            <div className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {event.gallery.map((image, index) => (
-                  <div key={index} className="relative aspect-square">
-                    <Image
-                      src={image}
-                      alt={`Gallery image ${index + 1}`}
-                      fill
-                      className="object-cover rounded-lg"
-                    />
-                  </div>
-                ))}
-              </div>
-              
+                </TableHeader>
+                <TableBody>
+                  {event.bookings.map((booking) => (
+                    <TableRow key={booking.id}>
+                      <TableCell>{booking.user.name}</TableCell>
+                      <TableCell>{booking.user.email}</TableCell>
+                      <TableCell>{booking.people}</TableCell>
+                      <TableCell>${booking.totalCost}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </AccordionContent>
+          </AccordionItem>
+  
+          <AccordionItem value="testimonials">
+            <AccordionTrigger className="text-xl font-semibold">
+              <Star className="mr-2" /> Testimonials
+            </AccordionTrigger>
+            <AccordionContent>
               <div className="space-y-4">
-                <h3 className="text-lg font-semibold">Add New Images</h3>
-                <ImageUpload onImageSelect={handleImageUpload} />
-                {newImages.length > 0 && (
-                  <div className="flex justify-end">
-                    <Button onClick={handleSaveGallery}>
-                      Save New Images
-                    </Button>
-                  </div>
-                )}
+                {event.testimonials.map((testimonial) => (
+                  <Card key={testimonial.id}>
+                    <CardContent className="pt-6">
+                      <div className="flex items-center mb-2">
+                        <div className="flex">
+                          {Array.from({ length: testimonial.rating }).map((_, i) => (
+                            <Star key={i} className="h-4 w-4 text-yellow-400 fill-current" />
+                          ))}
+                        </div>
+                        <span className="ml-2 font-semibold">{testimonial.user.name}</span>
+                      </div>
+                      <p>{testimonial.content}</p>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
-            </div>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
+            </AccordionContent>
+          </AccordionItem>
+  
+          <AccordionItem value="gallery">
+            <AccordionTrigger className="text-xl font-semibold">
+              <ImageIcon className="mr-2" /> Gallery
+            </AccordionTrigger>
+            <AccordionContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {event.images.map((image, index) => (
+                    <div key={index} className="relative aspect-square">
+                      <Image
+                        src={image}
+                        alt={`Gallery image ${index + 1}`}
+                        fill
+                        className="object-cover rounded-lg"
+                      />
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="space-y-4">
+                  <h3 className="text-lg font-semibold">Add New Images</h3>
+                  <ImageUpload onImageSelect={handleImageUpload} />
+                  {newImages.length > 0 && (
+                    <div className="flex justify-end">
+                      <Button onClick={handleSaveGallery}>
+                        Save New Images
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </AccordionContent>
+          </AccordionItem>
+        </Accordion>
+      </div>
+
+    ): null
   )
 }
