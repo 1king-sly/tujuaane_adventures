@@ -36,7 +36,7 @@ export default function Testimonials() {
         const interval = setInterval(() => {
           setCurrentTestimonial((prev) => (prev + 1) % testimonials.length);        
         return () => clearInterval(interval);
-      })}, []);
+      },5000)}, []);
 
   return (
     <>
