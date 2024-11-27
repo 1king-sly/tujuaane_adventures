@@ -17,6 +17,8 @@ export default function SingleEventGallery({
 }: {
     images: string[],id:string;
 }) {
+  const [uploadedImages, setImages] = useState<string[]>(images);
+
     const [newImages, setNewImages] = useState<File[]>([])
     const { toast } = useToast();
     const [isUploading, setIsUploading] = useState(false)
@@ -42,6 +44,7 @@ export default function SingleEventGallery({
   const handleSaveGallery = async () => {
 
     try {
+      setIsUploading(true)
         const formData = new FormData();
 
         if (newImages) {
@@ -49,7 +52,7 @@ export default function SingleEventGallery({
             formData.append('images', image)
           })        }
         const response = await fetch(`${API_URL}/events/${id}/upload`, {
-          method: "POST",
+          method: "PUT",
           headers: {
             Authorization: "Bearer " + localStorage.getItem("tujuane_access_token"),
           },
@@ -58,13 +61,19 @@ export default function SingleEventGallery({
   
         const data = await response.json()
 
+        console.log(data)
+
   
         if (response.ok) {
+          setNewImages([])
+          handleImagesSelect([])
+          setIsUploading(false)
+          setImages(data.images)
+
           toast({
             title: "Images Uploaded Successfully",
             description: `Gallery has been successfully updated.`,
           });
-          setNewImages([])
 
         } else {
           toast({
@@ -72,13 +81,17 @@ export default function SingleEventGallery({
             description: ` could not update gallery.`,
             variant: "destructive",
           });
+          setIsUploading(false)
+
         }
       } catch (error) {
         toast({
           title: "Error",
-          description: "Failed to update galleryt. Please try again.",
+          description: "Failed to update gallery. Please try again.",
           variant: "destructive",
         });
+        setIsUploading(false)
+
       }
 
   }
@@ -90,8 +103,8 @@ export default function SingleEventGallery({
       </div>
 
       <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {images?.map((image, index) => (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  {uploadedImages?.map((image, index) => (
                     <div key={index} className="relative aspect-square">
                       <Image
                         src={image}
@@ -108,9 +121,10 @@ export default function SingleEventGallery({
                   <MultiImageUpload 
                   onImagesSelect={handleImagesSelect}
                   maxFiles={5}
-                />                  {newImages.length > 0 && (
+                  clearOnSuccess={newImages.length === 0}
+                /> {newImages.length > 0 && (
                     <div className="flex justify-end">
-                      <Button onClick={handleSaveGallery}>
+                      <Button onClick={handleSaveGallery} disabled={isUploading}>
                         Save New Images
                       </Button>
                     </div>

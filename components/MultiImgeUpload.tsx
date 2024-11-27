@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback,useEffect } from 'react'
 import { useDropzone } from 'react-dropzone'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
@@ -7,14 +7,22 @@ import { cn } from '@/lib/utils'
 
 interface MultiImageUploadProps {
   onImagesSelect: (files: File[]) => void
-  maxFiles?: number
+  maxFiles?: number,
+  clearOnSuccess?: boolean
 }
 
 export default function MultiImageUpload({ 
   onImagesSelect, 
-  maxFiles = 10 
+  maxFiles = 10,
+  clearOnSuccess
 }: MultiImageUploadProps) {
   const [previews, setPreviews] = useState<Array<{ file: File; preview: string }>>([])
+
+  useEffect(() => {
+    if (clearOnSuccess) {
+      setPreviews([]);
+    }
+  }, [clearOnSuccess]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const newPreviews = acceptedFiles.map(file => ({

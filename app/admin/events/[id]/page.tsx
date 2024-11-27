@@ -3,14 +3,7 @@
 import { useState,useEffect } from 'react'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import Image from 'next/image'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
-import { useToast } from '@/hooks/use-toast'
-import ImageUpload from "@/components/imageUpload";
-import { Star, Users, Image as ImageIcon } from 'lucide-react'
+
 import SingleEvent from '@/components/Admin/SingleEvent';
 import SingleEventBookings from '@/components/Admin/SingleEventBookings';
 import SingleEventGallery from '@/components/Admin/SingleEventGallery';
@@ -50,8 +43,6 @@ interface Event{
   }
 
 export default function AdminEventDetailPage({params}:{params:{id:string}}) {
-  const [newImages, setNewImages] = useState<File[]>([])
-  const { toast } = useToast()
   const [event,setEvent] = useState<Event>()
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -69,7 +60,6 @@ export default function AdminEventDetailPage({params}:{params:{id:string}}) {
       })
 
       const data = await response.json()
-      console.log(data)
 
       if(response.ok){
         setEvent(data)
@@ -84,17 +74,7 @@ export default function AdminEventDetailPage({params}:{params:{id:string}}) {
   }, [API_URL, params.id])
 
 
-  const handleImageUpload = (file: File) => {
-    setNewImages(prev => [...prev, file])
-  }
 
-  const handleSaveGallery = async () => {
-    // Add API call to save new images
-    toast({
-      title: "Gallery Updated",
-      description: "New images have been added to the gallery.",
-    })
-  }
 
   return (
     event?(
