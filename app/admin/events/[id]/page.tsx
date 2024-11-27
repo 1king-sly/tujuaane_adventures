@@ -114,7 +114,7 @@ export default function AdminEventDetailPage({params}:{params:{id:string}}) {
           <SingleEventBookings bookings={event.bookings} />
         </TabsContent>
         <TabsContent value="gallery">
-          <SingleEventGallery images={event.images}/>
+          <SingleEventGallery images={event.images} id={event.id}/>
         </TabsContent>
         <TabsContent value="testimonials">
         <SingleEventTestimonial testimonials={event.testimonials} />

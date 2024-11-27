@@ -8,16 +8,19 @@ import ImageUpload from "@/components/imageUpload";
 
 
 import { useToast } from "@/hooks/use-toast";
+import MultiImageUpload from "../MultiImgeUpload";
 
 
 
 export default function SingleEventGallery({
-  images,
+  images,id
 }: {
-    images: string[];
+    images: string[],id:string;
 }) {
     const [newImages, setNewImages] = useState<File[]>([])
     const { toast } = useToast();
+    const [isUploading, setIsUploading] = useState(false)
+
 
   const handleDelete = async (id: string) => {
     toast({
@@ -26,16 +29,58 @@ export default function SingleEventGallery({
     });
   };
 
-  const handleImageUpload = (file: File) => {
-    setNewImages(prev => [...prev, file])
+  const handleImagesSelect = async (files: File[]) => {
+    if (files.length === 0) return
+
+    setNewImages(files)
+
   }
 
+  const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+
   const handleSaveGallery = async () => {
-    // Add API call to save new images
-    toast({
-      title: "Gallery Updated",
-      description: "New images have been added to the gallery.",
-    })
+
+    try {
+        const formData = new FormData();
+
+        if (newImages) {
+          newImages.forEach(image => {
+            formData.append('images', image)
+          })        }
+        const response = await fetch(`${API_URL}/events/${id}/upload`, {
+          method: "POST",
+          headers: {
+            Authorization: "Bearer " + localStorage.getItem("tujuane_access_token"),
+          },
+          body: formData,
+        });
+  
+        const data = await response.json()
+
+  
+        if (response.ok) {
+          toast({
+            title: "Images Uploaded Successfully",
+            description: `Gallery has been successfully updated.`,
+          });
+          setNewImages([])
+
+        } else {
+          toast({
+            title: "Failed",
+            description: ` could not update gallery.`,
+            variant: "destructive",
+          });
+        }
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to update galleryt. Please try again.",
+          variant: "destructive",
+        });
+      }
+
   }
 
   return (
@@ -60,8 +105,10 @@ export default function SingleEventGallery({
                 
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold">Add New Images</h3>
-                  <ImageUpload onImageSelect={handleImageUpload} />
-                  {newImages.length > 0 && (
+                  <MultiImageUpload 
+                  onImagesSelect={handleImagesSelect}
+                  maxFiles={5}
+                />                  {newImages.length > 0 && (
                     <div className="flex justify-end">
                       <Button onClick={handleSaveGallery}>
                         Save New Images
